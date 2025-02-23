@@ -68,7 +68,7 @@ def create_side_bar():
     Welcome to the **Sales Data Analysis App**! 
     """
     )
-    st.sidebar.markdown("---")  # Horizontal separator
+    st.sidebar.markdown("---")  
 
     st.sidebar.markdown("### Navigation")
     if st.sidebar.button("📖 Introduction", use_container_width=True):
@@ -78,7 +78,7 @@ def create_side_bar():
     if st.sidebar.button("📊 Data Analysis", use_container_width=True):
         set_page("Data Analysis")
 
-    st.sidebar.markdown("---")  # Horizontal separator
+    st.sidebar.markdown("---")  
     st.sidebar.markdown("### About This App")
     st.sidebar.write(
         "This application provides powerful tools for analyzing and visualizing sales data. "
@@ -88,11 +88,11 @@ def create_side_bar():
     # Add an image or logo to the sidebar
     Home_image_path = os.path.join(BASE_DIR, "images", "Home_image.png")
     st.sidebar.image(
-        Home_image_path,  # Replace with your image URL or file path
+        Home_image_path,  
         use_container_width=True,
     )
 
-    # Additional static note or contact info
+    # Contact info
     st.sidebar.markdown("---")
     st.sidebar.markdown("### Contact")
     st.sidebar.write("📧 Email: support@salesanalysisapp.com")
@@ -119,10 +119,10 @@ DB_NAME = "daktdl"
 def init_connection():
     try:
         conn = pymysql.connect(host=DB_HOST, user=DB_USER, password=DB_PASS, database=DB_NAME, port=DB_PORT)
-        print("✅ Database connection successful!")
+        print("✅ Database connection successful! ✅")
         return conn
     except Exception as e:
-        print(f"❌ Database connection failed: {e}")
+        print(f"❌ Database connection failed: {e} ❌")
         return None
 
 
@@ -135,12 +135,11 @@ def authenticate_user(username, password):
         conn = init_connection()
         cursor = conn.cursor()
 
-        # SQL query to check if the user exists
+        # SQL query
         query = "SELECT * FROM useraccount WHERE username = %s AND password = %s"
-        
         cursor.execute(query, (username, password))
         
-        # Fetch one record
+        # Fetch records
         user = cursor.fetchone()
         if (user):
             conn.close()
@@ -155,7 +154,7 @@ def authenticate_user(username, password):
         if cursor:
             cursor.close()
             
-# -- Function to check if the username already exist in the DB
+# -- Function to check the username
 def check_username_exist(username, gmail):
     cursor = None
     try:
@@ -193,7 +192,7 @@ def add_new_user(gmail, username, password):
         print((username, password, gmail) )
         cursor.execute(query, (username, password, gmail) )
         conn.commit()
-        # Close cursor and connection
+   
         cursor.close()
         conn.close()
         st.cache_resource.clear() 
@@ -207,10 +206,10 @@ def add_new_user(gmail, username, password):
 def is_valid_csv(file_stream):
     """Check if the file content is valid CSV."""
     try:
-        file_stream.seek(0)  # Reset the file pointer
-        content = file_stream.read().decode('utf-8')  # Read file as text
-        file_stream.seek(0)  # Reset the pointer again for further use
-        csv.Sniffer().sniff(content)  # Detect CSV dialect
+        file_stream.seek(0) 
+        content = file_stream.read().decode('utf-8')  
+        file_stream.seek(0)  
+        csv.Sniffer().sniff(content)  
         return True
     except Exception:
         return False
@@ -218,8 +217,8 @@ def is_valid_csv(file_stream):
 def is_valid_excel(file_stream):
     """Check if the file content is valid Excel."""
     try:
-        file_stream.seek(0)  # Reset the file pointer
-        pd.read_excel(file_stream)  # Try reading as Excel
+        file_stream.seek(0) 
+        pd.read_excel(file_stream)  
         return True
     except Exception:
         return False
@@ -317,22 +316,17 @@ def save_processed_data(data, uploaded_file):
 ### --- FUNCTION FOR DATA VISUALISATION ---
 def pie_chart(data: pd.DataFrame, sales_col: str, region_col: str):
     try:
-        # Clean data (drop rows with NaN values in relevant columns)
         data = data.dropna(subset=[region_col, sales_col])
-        
-        # Ensure the sales column is numeric
         data[sales_col] = pd.to_numeric(data[sales_col], errors='coerce')
         data = data.dropna(subset=[sales_col])  # Drop rows where sales are NaN after conversion
-        
-        # Group data by region and sum sales
         region_sales = data.groupby(region_col)[sales_col].sum().reset_index()
 
-        # Check if the resulting DataFrame is empty
+        # Check whether DataFrame is empty
         if region_sales.empty:
             st.warning(f"No data available for plotting with {region_col} and {sales_col}.")
             return
 
-        # Create the pie chart
+        # Pie chart
         fig = px.pie(
             region_sales,
             names=region_col,
@@ -347,22 +341,15 @@ def pie_chart(data: pd.DataFrame, sales_col: str, region_col: str):
 
 def bar_chart(data: pd.DataFrame, category_col: str, sales_col: str):
     try:
-        # Clean data (drop rows with NaN values in relevant columns)
         data = data.dropna(subset=[category_col, sales_col])
-        
-        # Ensure the sales column is numeric
         data[sales_col] = pd.to_numeric(data[sales_col], errors='coerce')
-        data = data.dropna(subset=[sales_col])  # Drop rows where sales are NaN after conversion
-        
-        # Group data by category and sum sales
+        data = data.dropna(subset=[sales_col])  # Drop NaN
         category_sales = data.groupby(category_col)[sales_col].sum().reset_index()
-
-        # Check if the resulting DataFrame is empty
         if category_sales.empty:
             st.warning(f"No data available for plotting with {category_col} and {sales_col}.")
             return
         
-        # Create the bar chart
+        # Bar chart
         fig = px.bar(
             category_sales,
             x=category_col,
@@ -372,14 +359,11 @@ def bar_chart(data: pd.DataFrame, category_col: str, sales_col: str):
             color=category_col
         )
         st.plotly_chart(fig)
-
     except:
-        # Handle unexpected errors and display an error message
         st.warning("No Bar Chart can be drawn from these columns.")
 
 def tree_map(data: pd.DataFrame, sales_col: str, region_col: str, category_col: str):
     try:
-        # Clean data (drop rows with NaN values in relevant columns)
         data = data.dropna(subset=[category_col, sales_col, region_col])
         
         # Ensure the sales column is numeric
@@ -390,7 +374,6 @@ def tree_map(data: pd.DataFrame, sales_col: str, region_col: str, category_col: 
         if treemap_data.empty:
             st.warning("No data available for plotting with these columns.")
             return
-        # Create the tree map
         fig = px.treemap(
             treemap_data,
             path=[region_col, category_col],
@@ -407,14 +390,12 @@ def tree_map(data: pd.DataFrame, sales_col: str, region_col: str, category_col: 
 def bar_chart_2(x_data, y_data, x_label, y_label):
     chart_container = st.empty()
 
-    # Create a DataFrame from the input data
+
     data = pd.DataFrame({'X': x_data, 'Y': y_data})
 
     try:
-        # Calculate the average y_data per x_data and reset index
         avg_data = data.groupby('X', as_index=False)['Y'].mean()
-
-        # Create the Plotly bar chart
+        # Create Plotly bar chart
         fig = px.bar(
             avg_data,
             x='X',
@@ -476,7 +457,7 @@ def data_classification(data, target_col, selected_columns):
     # Train-test split
     x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=0.8, random_state=27)
 
-    # Scale the data
+    # Scale the data using StandardScaler
     scaler = StandardScaler()
     x_train = scaler.fit_transform(x_train)
     x_test = scaler.transform(x_test)
@@ -990,12 +971,8 @@ def introduction_page():
     """,
     unsafe_allow_html=True,
     )
-
-
-    # --- Add Side Bar ---
     create_side_bar()
         
-
 
 # ----- DATA UPLOAD PAGE ----- #
 
@@ -1223,7 +1200,7 @@ def file_upload_page():
     - Contact support if you encounter any issues.
     """
     )
-    st.sidebar.markdown("---")  # Horizontal separator
+    st.sidebar.markdown("---")  
     st.sidebar.markdown("### About Uploading Files:")
 
     # --- Add an interactive element ---
@@ -1239,7 +1216,7 @@ def file_upload_page():
         """
     )
 
-    st.sidebar.markdown("---")  # Horizontal separator
+    st.sidebar.markdown("---")  
     
     st.sidebar.markdown("### Navigation")
     if st.sidebar.button("📖 Introduction", use_container_width=True):
@@ -1249,7 +1226,7 @@ def file_upload_page():
     if st.sidebar.button("📊 Data Analysis", use_container_width=True):
         set_page("Data Analysis")
 
-    st.sidebar.markdown("---")  # Horizontal separator
+    st.sidebar.markdown("---") 
     # Add an image or logo to the sidebar
     Login1_path = os.path.join(BASE_DIR, "images", "Login_1.png")
     st.sidebar.image(
